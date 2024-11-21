@@ -2,11 +2,7 @@ from sklearn.datasets import load_wine
 import numpy as np
 import pandas as pd
 
-def loadData(tsLength):
-    # Load wine dataset
-    wine = load_wine()
-    data = pd.DataFrame(wine.data, columns=wine.feature_names)  # Convert to DataFrame
-    targets = wine.target  # Get target values
+def loadData(data, targets, tsLength):
 
     # Normalize the entire dataset
     data_min = np.min(data, axis=0)  # Feature-wise min

@@ -1,22 +1,3 @@
-# from math import sqrt
-
-# def computeNorm(trainingRow, testRow):
-#     distance = 0   
-#     for i in range(len(trainingRow)):
-#         distance += (trainingRow[i] - testRow[i]) ** 2
-#     return sqrt(distance)
-
-# def knn(trainingSet, trainingTargets, testSet, k):
-#     for i in range(len(testSet)):
-#         distances = []
-#         for j in range(len(trainingSet)):
-#             distances.append([computeNorm(trainingSet[j], testSet[i]), j])            
-#         sortedDistances = sorted(distances, key=lambda x: x[0])
-#         kNearest = sortedDistances[:k] 
-#         kNearestTargets = [trainingTargets[x[1]] for x in kNearest]
-#         mostFrequent = max(set(kNearestTargets), key=kNearestTargets.count)
-#         return mostFrequent
-
 import numpy as np
 
 def knn(trainingSet, trainingTargets, testSet, k, testTargets = None):
@@ -37,16 +18,14 @@ def knn(trainingSet, trainingTargets, testSet, k, testTargets = None):
         # Sort distances and get indices of the k nearest neighbors
         sortedDistances = sorted(distances, key=lambda x: x[0])
         kNearest = sortedDistances[:k]
-        
         # Retrieve the targets of the k nearest neighbors
         kNearestTargets = [trainingTargets[x[1]] for x in kNearest]
-        
         # Find the most frequent target among the k nearest neighbors
         mostFrequent = max(set(kNearestTargets), key=kNearestTargets.count)
         
         # Append the prediction for the current test sample
         predictions.append(mostFrequent)
-   
+
     if testTargets is not None:
         errorRate = 0
         for a in range(len(predictions)):
@@ -54,8 +33,5 @@ def knn(trainingSet, trainingTargets, testSet, k, testTargets = None):
                 errorRate += 1
         errorRate /= len(predictions)
         return predictions, errorRate
-    
-    return predictions
 
-        
-    
+    return predictions
