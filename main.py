@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from loadData import *
 from knn import *
-from plotConfusionMatrices import *
+from functions import *
 
 
 # Load wine dataset
@@ -10,12 +10,12 @@ wine = load_wine()
 data = pd.DataFrame(wine.data, columns=wine.feature_names)  # Convert to DataFrame
 targets = wine.target  # Get target values
 
-classes = set(targets)  # Set delle classi presenti nei target
+classes = sorted(set(targets))  # Set delle classi presenti nei target
 
 # Lista dei valori di k
 kval = [1, 2, 3, 5, 10, 15, 20, 30, 50]
 
-reps = 10 
+reps = 3 
 
 accuracies = [[[[] for r in range(reps)] for k in kval ] for c in classes]
 errorsRate = [[[[] for r in range(reps)] for k in kval ] for c in classes]
@@ -84,26 +84,22 @@ for r in range(reps):
             plotConfMatr(confusionMatrices[c], c, kval)
 
 #PLOT METRICS
-avgER = [[[] for k in kval] for c in classes]
-avgAcc = [[[] for k in kval] for c in classes]
-avgRec = [[[] for k in kval] for c in classes]
-avgPrec = [[[] for k in kval] for c in classes]
-avgF1 = [[[] for k in kval] for c in classes]
 
-for c in classes:
-    for k in range(len(kval)):
-        avgER[c][k] = computeAvg(errorsRate[c][k])
-        avgAcc[c][k] = computeAvg(accuracies[c][k])
-        avgRec[c][k] = computeAvg(recalls[c][k])
-        avgPrec[c][k] = computeAvg(precisions[c][k])
-        avgF1[c][k] = computeAvg(f1s[c][k])                        
-        if kval[k] % 2 == 0:
-            print("WARNING: k:", kval[k], "divisibile by 2")
-            print()
-        print("Class: ", c , "k: ", kval[k])
-        print("Average errorRate: ", round(avgER[c][k],3))
-        print("Average Precision: ", round(avgPrec[c][k], 3))
-        print("Average Recall: ", round(avgRec[c][k], 3))
-        print("Average F1 score: ", round(avgF1[c][k], 3))
-        print("Average Accuracy: ", round(avgAcc[c][k], 3))
-        print()
+avgER = [[0 for k in range(len(kval))] for c in range(len(classes))]
+avgAcc = [[0 for k in range(len(kval))] for c in range(len(classes))]
+avgRec = [[0 for k in range(len(kval))] for c in range(len(classes))]
+avgPrec = [[0 for k in range(len(kval))] for c in range(len(classes))]
+avgF1 = [[0 for k in range(len(kval))] for c in range(len(classes))]
+
+
+for c_idx, c in enumerate(classes):  # Usa enumerate per iterare con gli indici
+    for k_idx in range(len(kval)):  # Itera sugli indici di kval
+        avgER[c_idx][k_idx] = computeAvg(errorsRate[c][k_idx])
+        avgAcc[c_idx][k_idx] = computeAvg(accuracies[c][k_idx])
+        avgRec[c_idx][k_idx] = computeAvg(recalls[c][k_idx])
+        avgPrec[c_idx][k_idx] = computeAvg(precisions[c][k_idx])
+        avgF1[c_idx][k_idx] = computeAvg(f1s[c][k_idx])  
+
+data = [avgER, avgAcc, avgRec, avgPrec, avgF1]
+titles = ['Average error rate', 'Average accuracy', 'Average recall', 'Average precision', 'Average F1 score']
+plotTables(data, titles, kval)
