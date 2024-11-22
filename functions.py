@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
+
 def plot_cm(matrix, ax, k):
 
     conf_matrix = matrix
@@ -66,8 +67,46 @@ def computeAvg(metric):
     
     return sum(metric) / len(metric)
 
-def plotTables(data, titles, kval):
+def computeMed(metric):
+     # Controlla se ci sono sottoliste
+    if any(isinstance(i, list) for i in metric):
+        # Appiattisce la lista se necessario
+        metric = [item for sublist in metric for item in sublist]
+    ordered = sorted(metric)
+    if(len(ordered) % 2 == 0):
+        median = [0, 0]
+        median[0] = ordered[int(len(ordered)/2)]
+        median[1] = ordered[int((len(ordered)/2)) - 1]
+        return (median[0] + median[1])/2
+    else:
+        return ordered[len(ordered)//2]
     
+def computeStd(metric):
+    # Controlla se ci sono sottoliste
+    if any(isinstance(i, list) for i in metric):
+        # Appiattisce la lista se necessario
+        metric = [item for sublist in metric for item in sublist]
+    
+    # Calcola la deviazione standard
+    if len(metric) == 0:
+        raise ValueError("Metric list is empty, cannot compute standard deviation.")
+    
+    std = np.std(metric)
+    return std
+
+def computePerc(metric, perc1, perc2):
+    # Controlla se ci sono sottoliste
+    if any(isinstance(i, list) for i in metric):
+        # Appiattisce la lista se necessario
+        metric = [item for sublist in metric for item in sublist]
+
+        percentile25 = np.percentile(metric, perc1)  # 25° percentile 
+        percentile75 = np.percentile(metric, perc2)  # 75° percentile 
+        return percentile75 - percentile25
+
+
+def plotTables(data, titles, kval,note=None):
+    # Trasponi i dati per ciascuna metrica
     transposed_d0 = list(map(list, zip(*data[0])))  
     transposed_d1 = list(map(list, zip(*data[1])))  
     transposed_d2 = list(map(list, zip(*data[2])))  
@@ -77,16 +116,18 @@ def plotTables(data, titles, kval):
     # Dati per ogni tabella
     data = [transposed_d0, transposed_d1, transposed_d2, transposed_d3, transposed_d4]
 
-    # Etichette aggiornate
-    columns = ["Class 0", "Class 1", "Class 2"]  # Ora diventano colonne
-    rows = [f"K= {k}" for k in kval]  # Ora diventano righe
+    # Etichette per le colonne
+    columns = ["Class 0", "Class 1", "Class 2"]
+    
+    # Genera le righe (K=1, K=2,...)
+    rows = [f"K= {k}" for k in kval]
 
     # Crea un layout con 2 righe e 3 colonne (5 tabelle in totale)
     fig, axes = plt.subplots(2, 3, figsize=(18, 8))  # 2 righe e 3 colonne
 
     # Aggiungi ciascuna tabella nella rispettiva sotto-figura
-    for i, ax in enumerate(axes.flat):  # axes.flat rende l'iterazione su tutte le sotto-figure
-        if i < 5:  # Solo 5 tabelle, quindi limitiamo l'iterazione
+    for i, ax in enumerate(axes.flat):  # Itera su tutte le sotto-figure
+        if i < 5:  # Solo 5 tabelle
             ax.axis('tight')
             ax.axis('off')
 
@@ -98,22 +139,24 @@ def plotTables(data, titles, kval):
                 loc='center',
                 cellLoc='center'
             )
-            
+
             # Imposta larghezza e altezza per ogni cella
             for cell in table.get_celld().values():
                 cell.set_width(0.1)  # Imposta larghezza per ogni cella
                 cell.set_height(0.09)
 
-            # Aggiungi un titolo a ciascuna tabella (personalizzabile per ogni tabella)
-            titles = [titles[0], titles[1], titles[2], titles[3], titles[4]]
+            # Aggiungi un titolo a ciascuna tabella
             ax.set_title(f"{titles[i]}", fontsize=14)
         else:
-            # Se ci sono meno di 6 tabelle, disabilitiamo le celle extra
+            # Disabilita le celle extra se ci sono meno di 6 tabelle
             ax.axis('off')
 
     # Mostrare il plot con tutte le tabelle
     plt.tight_layout()  # Ottimizza la disposizione
+
+    if note is not None:
+        # Posiziona la nota nello spazio della tabella mancante
+        axes[1, 2].axis('off')
+        axes[1, 2].text(0.5, 0.5, f"NOTE: {note}", wrap=True, horizontalalignment='center', fontsize=12, verticalalignment='center')
     plt.show()
-
-
-
+   
