@@ -4,18 +4,39 @@ from loadData import *
 from knn import *
 from functions import *
 
+#############################
+# TASK 1 - OBTAIN A DATASET #
+#############################
 
-# Load wine dataset
 wine = load_wine()
 data = pd.DataFrame(wine.data, columns=wine.feature_names)  # Convert to DataFrame
 targets = wine.target  # Get target values
 
-classes = sorted(set(targets))  # Set delle classi presenti nei target
+(trainingSet, trainingTargets), (testSet, testTargets) = loadData(data, targets, 0.3)  # 30% of the data is used for testing
 
-# Lista dei valori di k
+###################################
+# TASK 2 - BUILD A KNN CLASSIFIER #
+###################################
+
+# List of the values of k
 kval = [1, 2, 3, 5, 10, 15, 20, 25, 50]
 
+
+for k in kval:
+    predictions, errorRate = knn(trainingSet, trainingTargets, testSet, k, testTargets)
+
+    print(f"K = {k}")
+    if k%3 == 0:
+        print("WARNING: k mutiple of the class number, possible ties")
+    print(f"Error rate: {round(errorRate,3)}\n")
+
+####################################
+# TASK 3 - TEST THE KNN CLASSIFIER #
+####################################
+
 reps = 10
+
+classes = sorted(set(targets))  # Get the unique classes in the target values
 
 accuracies = [[[[] for r in range(reps)] for k in kval ] for c in classes]
 errorsRate = [[[[] for r in range(reps)] for k in kval ] for c in classes]
@@ -24,8 +45,9 @@ precisions = [[[[] for r in range(reps)] for k in kval ] for c in classes]
 f1s = [[[[] for r in range(reps)] for k in kval ] for c in classes]
 
 for r in range(reps):
+
     #Compute a new testSet and trainingSet for each repetition
-    (trainingSet, trainingTargets), (testSet, testTargets) = loadData(data, targets, 0.3)  # 30% of the data is used for testing
+    (trainingSet, trainingTargets), (testSet, testTargets) = loadData(data, targets, 0.3)
     
     confusionMatrices = [[] for c in classes]
 
@@ -46,11 +68,9 @@ for r in range(reps):
             else:
                 testBin.append(0) 
 
-        # Calcolo delle confusion matrices per ogni k
         for k in range(len(kval)):
             confusionMatrix = np.zeros((2, 2), dtype=int)
 
-            # Esegui il kNN e ottieni le predizioni
             predictions, errorRate = knn(trainingSet, trainingBin, testSet, kval[k], testBin)
 
             for j in range(len(predictions)):
@@ -60,7 +80,6 @@ for r in range(reps):
         
             confusionMatrices[c].append(confusionMatrix)
             
-            # Calcolo delle metriche
             TP = confusionMatrix[1, 1]
             FP = confusionMatrix[0, 1]
             TN = confusionMatrix[0, 0]
@@ -76,14 +95,13 @@ for r in range(reps):
             recalls[c][k][r].append(recall)
             precisions[c][k][r].append(precision)
             f1s[c][k][r].append(f1score)
-
     
-    #PLOT CONFUSION MATRICES
+    #Plot confusion matrices
     if r == 9:
         for c in classes:
             plotConfMatr(confusionMatrices[c], c, kval)
 
-#PLOT METRICS
+#Plot metrics
 
 avgER = [[0 for k in range(len(kval))] for c in range(len(classes))]
 avgAcc = [[0 for k in range(len(kval))] for c in range(len(classes))]
@@ -110,8 +128,8 @@ percPrec = [[0 for k in range(len(kval))] for c in range(len(classes))]
 percF1 = [[0 for k in range(len(kval))] for c in range(len(classes))]
 
 
-for c_idx, c in enumerate(classes):  # Usa enumerate per iterare con gli indici
-    for k_idx in range(len(kval)):  # Itera sugli indici di kval
+for c_idx, c in enumerate(classes):
+    for k_idx in range(len(kval)):
         avgER[c_idx][k_idx] = computeAvg(errorsRate[c][k_idx])
         avgAcc[c_idx][k_idx] = computeAvg(accuracies[c][k_idx])
         avgRec[c_idx][k_idx] = computeAvg(recalls[c][k_idx])

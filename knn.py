@@ -9,21 +9,17 @@ def knn(trainingSet, trainingTargets, testSet, k, testTargets = None):
     if k < 1 or k > len(trainingSet):
         raise ValueError("k must be a positive integer less than the number of training samples")
     
-    predictions = []  # To store the predicted labels for each test sample
-    for i in range(len(testSet)):  # Iterate through each test sample
+    predictions = []
+    for i in range(len(testSet)):
         distances = []
-        for j in range(len(trainingSet)):  # Compute distance to all training samples
+        for j in range(len(trainingSet)):
             distances.append([np.linalg.norm(trainingSet[j] - testSet[i]), j])
         
-        # Sort distances and get indices of the k nearest neighbors
         sortedDistances = sorted(distances, key=lambda x: x[0])
         kNearest = sortedDistances[:k]
-        # Retrieve the targets of the k nearest neighbors
         kNearestTargets = [trainingTargets[x[1]] for x in kNearest]
-        # Find the most frequent target among the k nearest neighbors
         mostFrequent = max(set(kNearestTargets), key=kNearestTargets.count)
         
-        # Append the prediction for the current test sample
         predictions.append(mostFrequent)
 
     if testTargets is not None:

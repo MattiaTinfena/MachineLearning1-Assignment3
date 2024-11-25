@@ -8,7 +8,7 @@ def loadData(data, targets, tsLength):
     data_min = np.min(data, axis=0) 
     data_max = np.max(data, axis=0)  
 
-    data = (data - data_min) / (data_max - data_min)  # Normalize the entire dataset
+    data = (data - data_min) / (data_max - data_min)
 
     # Split the dataset into training and test sets
     numTrainSamples = round(len(data) * (1 - tsLength))
