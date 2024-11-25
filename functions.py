@@ -3,12 +3,12 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
 
-def plot_cm(matrix, ax, k):
+def plotCm(matrix, ax, k):
 
     conf_matrix = matrix
 
-    labels = ["True Pos", "False Pos"]
-    ticks = ["False Neg", "True Neg"]
+    labels = ["Predicted Neg", "Predicted Pos"]
+    ticks = ["Actual Neg", "Actual Pos"]
 
     # Plot the confusion matrix on the provided ax
     custom_cmap = LinearSegmentedColormap.from_list("custom_blues", ["#FFFFFF", "#66B2FF", "#457b9d"])
@@ -25,8 +25,10 @@ def plot_cm(matrix, ax, k):
     ax.set_xticklabels(labels, rotation = 0, ha = "center", fontsize = 8)
     ax.set_yticklabels(ticks, rotation = 90, ha = "center", fontsize = 8)
     ax.tick_params(axis = 'y', pad = 15)
-    ax.set_title(f"k = {k}", fontsize = 10, pad = 3)
-
+    if k%2 == 0:
+        ax.set_title(f"k = {k}\n(k multiple of 2, possible tides)", fontsize = 10, pad = 3, color = "red")
+    else:
+        ax.set_title(f"k = {k}", fontsize = 10, pad = 3)
     
     # Add a colorbar to the parent figure
     if hasattr(ax, 'cax'):
@@ -43,13 +45,13 @@ def plotConfMatr(matrices, cl, k):
     # Plot each confusion matrix in the corresponding subplot
     for i, ax in enumerate(axes.flat):
         if i < len(matrices):
-            plot_cm(matrices[i], ax, k[i])
+            plotCm(matrices[i], ax, k[i])
         else:
             # Hide unused subplots
             ax.axis('off')
 
     # Adjust spacing to bring plots closer together
-    plt.subplots_adjust(wspace = 0.08, hspace = 0.3)  # Reduce horizontal and vertical spacing
+    plt.subplots_adjust(wspace = 0.08, hspace = 0.44)  # Reduce horizontal and vertical spacing
     
     # Show the figure
     plt.show()   
@@ -65,7 +67,7 @@ def computeAvg(metric):
     if len(metric) == 0:
         raise ValueError("Metric list is empty, cannot compute average.")
     
-    return sum(metric) / len(metric)
+    return round((sum(metric) / len(metric)),3)
 
 def computeMed(metric):
      # Controlla se ci sono sottoliste
@@ -77,9 +79,9 @@ def computeMed(metric):
         median = [0, 0]
         median[0] = ordered[int(len(ordered)/2)]
         median[1] = ordered[int((len(ordered)/2)) - 1]
-        return (median[0] + median[1])/2
+        return round(((median[0] + median[1])/2),3)
     else:
-        return ordered[len(ordered)//2]
+        return round(ordered[len(ordered)//2],3)
     
 def computeStd(metric):
     # Controlla se ci sono sottoliste
@@ -92,7 +94,7 @@ def computeStd(metric):
         raise ValueError("Metric list is empty, cannot compute standard deviation.")
     
     std = np.std(metric)
-    return std
+    return round(std,3)
 
 def computePerc(metric, perc1, perc2):
     # Controlla se ci sono sottoliste
@@ -102,7 +104,7 @@ def computePerc(metric, perc1, perc2):
 
         percentile25 = np.percentile(metric, perc1)  # 25° percentile 
         percentile75 = np.percentile(metric, perc2)  # 75° percentile 
-        return percentile75 - percentile25
+        return f"[{round(percentile25,3)}, {round(percentile75,3)}]"
 
 
 def plotTables(data, titles, kval,note=None):
@@ -133,7 +135,7 @@ def plotTables(data, titles, kval,note=None):
 
             # Crea la tabella nella i-esima sotto-figura
             table = ax.table(
-                cellText=[[round(value, 3) for value in row] for row in data[i]],
+                cellText=[[value for value in row] for row in data[i]],
                 colLabels=columns,
                 rowLabels=rows,
                 loc='center',
@@ -142,8 +144,13 @@ def plotTables(data, titles, kval,note=None):
 
             # Imposta larghezza e altezza per ogni cella
             for cell in table.get_celld().values():
-                cell.set_width(0.1)  # Imposta larghezza per ogni cella
+                cell.set_width(0.25)  # Imposta larghezza per ogni cella
                 cell.set_height(0.09)
+            
+            
+            for (a, b), cell in table.get_celld().items():
+                if kval[a - 1]%2 == 0 and a > 1:
+                    cell.set_text_props(color="red")
 
             # Aggiungi un titolo a ciascuna tabella
             ax.set_title(f"{titles[i]}", fontsize=14)
@@ -154,9 +161,10 @@ def plotTables(data, titles, kval,note=None):
     # Mostrare il plot con tutte le tabelle
     plt.tight_layout()  # Ottimizza la disposizione
 
+    axes[1, 2].text(0.5, 0.6, "WARNING: K multiple of 2, possible tides", wrap=True, horizontalalignment='center', fontsize=12, verticalalignment='center', color='red')
+
     if note is not None:
         # Posiziona la nota nello spazio della tabella mancante
         axes[1, 2].axis('off')
         axes[1, 2].text(0.5, 0.5, f"NOTE: {note}", wrap=True, horizontalalignment='center', fontsize=12, verticalalignment='center')
     plt.show()
-   

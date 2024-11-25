@@ -13,7 +13,7 @@ targets = wine.target  # Get target values
 classes = sorted(set(targets))  # Set delle classi presenti nei target
 
 # Lista dei valori di k
-kval = [1, 2, 3, 5, 10, 15, 20, 30, 50]
+kval = [1, 2, 3, 5, 10, 15, 20, 25, 50]
 
 reps = 10
 
@@ -108,6 +108,7 @@ percAcc = [[0 for k in range(len(kval))] for c in range(len(classes))]
 percRec = [[0 for k in range(len(kval))] for c in range(len(classes))]
 percPrec = [[0 for k in range(len(kval))] for c in range(len(classes))]
 percF1 = [[0 for k in range(len(kval))] for c in range(len(classes))]
+
 
 for c_idx, c in enumerate(classes):  # Usa enumerate per iterare con gli indici
     for k_idx in range(len(kval)):  # Itera sugli indici di kval

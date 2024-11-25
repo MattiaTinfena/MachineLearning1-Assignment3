@@ -5,8 +5,8 @@ import pandas as pd
 def loadData(data, targets, tsLength):
 
     # Normalize the entire dataset
-    data_min = np.min(data, axis=0)  # Feature-wise min
-    data_max = np.max(data, axis=0)  # Feature-wise max
+    data_min = np.min(data, axis=0) 
+    data_max = np.max(data, axis=0)  
 
     data = (data - data_min) / (data_max - data_min)  # Normalize the entire dataset
 
@@ -23,3 +23,6 @@ def loadData(data, targets, tsLength):
     testSetTargets = targets[testSetIndices]
 
     return (trainingSet, trainingSetTargets), (testSet, testSetTargets)
+
+
+
